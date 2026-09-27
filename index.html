@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REZE</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    color: white;
+    font-family: Georgia, serif;
+}
+
+#video,
+#videoFinal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+#videoFinal {
+    display: none;
+}
+
+#oscuro,
+#oscuroFinal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1;
+}
+
+#oscuroFinal {
+    background: rgba(0,0,0,.55);
+    display: none;
+}
+
+.pantalla {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    padding: 25px;
+}
+
+.caja {
+    width: min(700px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px 25px;
+    text-align: center;
+    background: rgba(0,0,0,.65);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 25px;
+}
+
+h1 {
+    font-size: clamp(70px,18vw,140px);
+    font-weight: normal;
+    letter-spacing: 10px;
+    margin: 0 0 20px;
+}
+
+h2 {
+    font-size: 42px;
+    font-weight: normal;
+}
+
+p {
+    line-height: 1.8;
+}
+
+input {
+    width: min(350px,100%);
+    padding: 14px;
+    border-radius: 25px;
+    border: 1px solid white;
+    background: rgba(0,0,0,.6);
+    color: white;
+    text-align: center;
+    font-size: 17px;
+}
+
+button {
+    margin-top: 20px;
+    padding: 13px 30px;
+    border-radius: 25px;
+    border: 1px solid white;
+    background: rgba(255,255,255,.12);
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: rgba(255,255,255,.22);
+}
+
+#error,
+#errorFinal {
+    color: #ffaaaa;
+    min-height: 24px;
+}
+
+.botonVolver {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* =========================
+   MÚSICA
+========================= */
+
+.cancion {
+    margin-top: 30px;
+}
+
+.cancion strong {
+    font-size: 20px;
+}
+
+audio {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* =========================
+   FOQUITA
+========================= */
+
+.foquita-contenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.foquita {
+    position: relative;
+    width: 210px;
+    height: 145px;
+    cursor: pointer;
+    transition: transform .25s ease;
+    animation: flotar 3s ease-in-out infinite;
+}
+
+.foquita:hover {
+    transform: scale(1.06);
+}
+
+.foquita-cuerpo {
+    position: absolute;
+    width: 170px;
+    height: 105px;
+    background: #d8d8d8;
+    border-radius: 55% 55% 45% 45%;
+    left: 20px;
+    top: 35px;
+    box-shadow:
+        inset -12px -8px 0 rgba(0,0,0,.08),
+        0 8px 20px rgba(0,0,0,.35);
+}
+
+.foquita-cabeza {
+    position: absolute;
+    width: 85px;
+    height: 75px;
+    background: #dedede;
+    border-radius: 50%;
+    left: 63px;
+    top: 15px;
+    z-index: 3;
+}
+
+.ojo {
+    position: absolute;
+    width: 9px;
+    height: 11px;
+    background: #111;
+    border-radius: 50%;
+    top: 35px;
+}
+
+.ojo.izq {
+    left: 25px;
+}
+
+.ojo.der {
+    right: 25px;
+}
+
+.nariz {
+    position: absolute;
+    width: 15px;
+    height: 11px;
+    background: #222;
+    border-radius: 50%;
+    left: 35px;
+    top: 48px;
+}
+
+.boca {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    border-bottom: 2px solid #222;
+    border-radius: 50%;
+    left: 32px;
+    top: 52px;
+}
+
+.aleta {
+    position: absolute;
+    width: 65px;
+    height: 35px;
+    background: #cfcfcf;
+    border-radius: 70% 30% 70% 30%;
+    top: 78px;
+    z-index: 1;
+}
+
+.aleta.izq {
+    left: 0;
+    transform: rotate(25deg);
+}
+
+.aleta.der {
+    right: 0;
+    transform: rotate(-25deg);
+}
+
+.manchita {
+    position: absolute;
+    background: rgba(80,80,80,.18);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.m1 {
+    width: 12px;
+    height: 9px;
+    left: 45px;
+    top: 65px;
+}
+
+.m2 {
+    width: 9px;
+    height: 7px;
+    left: 135px;
+    top: 65px;
+}
+
+.m3 {
+    width: 7px;
+    height: 7px;
+    left: 125px;
+    top: 90px;
+}
+
+@keyframes flotar {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+#mensajeFoquita {
+    min-height: 55px;
+    margin-top: 15px;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity .4s ease;
+}
+
+#continuarFoquita {
+    display: none;
+}
+
+/* =========================
+   CARTA FINAL
+========================= */
+
+#claveFinal {
+    z-index: 2;
+}
+
+#final {
+    display: none !important;
+    z-index: 3;
+}
+
+.carta-final {
+    width: min(700px, 100%);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 35px 25px;
+    text-align: left;
+    background: rgba(0,0,0,.75);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 25px;
+}
+
+.carta-final h2 {
+    text-align: center;
+}
+
+.carta-texto {
+    line-height: 1.9;
+}
+</style>
+</head>
+
+<body>
+
+<video id="video" muted playsinline>
+    <source src="video1.mp4" type="video/mp4">
+</video>
+
+<div id="oscuro"></div>
+
+<audio id="musica">
+    <source src="musica1.mp3" type="audio/mpeg">
+</audio>
+
+<!-- PORTADA -->
+<section id="portada" class="pantalla">
+<div class="caja">
+
+    <h1>REZE</h1>
+
+    <p>
+        Una historia que llegó sin avisar y dejó recuerdos
+        que todavía permanecen.
+    </p>
+
+    <button id="entrar">
+        Entrar
+    </button>
+
+</div>
+</section>
+
+<!-- PRIMERA CONTRASEÑA -->
+<section id="clave" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Antes de continuar...</h2>
+
+    <input
+        id="password"
+        type="password"
+        placeholder="Contraseña"
+    >
+
+    <br>
+
+    <button id="abrir">
+        Abrir
+    </button>
+
+    <p id="error"></p>
+
+</div>
+</section>
+
+<!-- LO QUE FUIMOS -->
+<section id="primera" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Lo que fuimos</h2>
+
+    <p>
+        Si tuviera que explicar lo que fuimos, la verdad no sabría
+        muy bien por dónde empezar. Fueron muchas cosas pequeñas que,
+        en su momento, quizá no parecían tan importantes, pero que ahora
+        cuando las recuerdo significan bastante para mí.
+    </p>
+
+    <p>
+        Recuerdo esas madrugadas hablando contigo, jugando,
+        contándonos cómo nos había ido en el día o simplemente hablando
+        de cualquier cosa. A veces ni siquiera necesitábamos un tema
+        para seguir hablando, simplemente terminábamos quedándonos ahí
+        hasta tarde.
+    </p>
+
+    <p>
+        También recuerdo cuando nos mandábamos videos, animales bonitos
+        o cualquier cosa que encontrábamos y pensábamos que al otro le
+        podía gustar. Puede parecer algo simple, pero eran esas pequeñas
+        cosas las que poco a poco hicieron que te volvieras parte de mis días.
+    </p>
+
+    <p>
+        Sin darme cuenta, me acostumbré a tenerte ahí. A saber que podía
+        escribirte, contarte algo o simplemente hablar contigo cuando quisiera.
+    </p>
+
+    <p>
+        Y creo que con el tiempo entendí algo que antes no sabía:
+        a veces puedes querer muchísimo a una persona y aun así no saber
+        cómo demostrarlo de la manera que esa persona necesita.
+    </p>
+
+    <p>
+        Tal vez hubo cosas que no entendí a tiempo o momentos en los que
+        pude haber hecho las cosas diferente. Pero eso no cambia lo mucho
+        que significaron para mí esos días.
+    </p>
+
+    <p>
+        No sé si nuestra historia estaba destinada a durar mucho o poco.
+        Pero sé que fue importante para mí.
+    </p>
+
+    <p>
+        Y aunque las cosas hayan cambiado, no quiero fingir que nunca
+        pasó nada, porque sería mentira. Fuiste una parte muy bonita
+        de mi vida y, aunque ya no estemos como antes, todavía recuerdo
+        todo aquello con mucho cariño.
+    </p>
+
+    <button id="continuarPrimera">
+        Continuar →
+    </button>
+
+</div>
+</section>
+
+<!-- ALGUNAS COSAS -->
+<section id="segunda" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Algunas cosas que quedaron</h2>
+
+    <p>
+        Todavía hay cosas que recuerdo de ti sin siquiera buscarlas.
+    </p>
+
+    <p>
+        A veces me acuerdo de nuestras conversaciones, de las madrugadas
+        en las que nos quedábamos hablando, de los juegos y de todas esas
+        cosas que compartíamos sin pensar demasiado.
+    </p>
+
+    <p>
+        Me gustaba escucharte, tu voz, tu forma de hablarme, tu personalidad
+        y hasta esas pequeñas cosas tuyas que quizá tú ni siquiera
+        considerabas importantes.
+    </p>
+
+    <p>
+        Creo que lo que más extraño no es una sola cosa. Extraño esa
+        sensación de saber que estabas ahí. De poder contarte cómo había
+        sido mi día, preguntarte cómo estabas o simplemente hablar contigo
+        sin necesitar una razón.
+    </p>
+
+    <p>
+        Desde afuera probablemente muchas de esas cosas parecían pequeñas,
+        pero para mí no lo eran.
+    </p>
+
+    <p>
+        Con el tiempo te volviste alguien importante para mí y creo que
+        me di cuenta de eso cuando ya no estabas de la misma manera.
+    </p>
+
+    <p>
+        No quiero cambiar el pasado ni hacer que las cosas sean diferentes
+        a la fuerza. Solo quería que supieras que, al menos para mí,
+        todo aquello sí significó algo.
+    </p>
+
+    <p>
+        Y aunque ahora solo me queden los recuerdos, supongo que también
+        está bien. Hay personas que pasan por nuestra vida y, aunque
+        después los caminos cambien, dejan algo que simplemente no se borra.
+    </p>
+
+    <button id="volverSegunda" class="botonVolver">
+        ← Volver
+    </button>
+
+    <button id="continuarSegunda">
+        Continuar →
+    </button>
+
+</div>
+</section>
+
+<!-- MÚSICA -->
+<section id="musicaSeccion" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Las canciones que quedaron</h2>
+
+    <p>
+        Hay canciones que simplemente terminan recordándote a alguien.
+    </p>
+
+    <div class="cancion">
+        <p>
+            <strong>Deftones</strong><br>
+            Cherry Waves
+        </p>
+
+        <audio controls class="cancionAudio">
+            <source src="cherry-waves.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <div class="cancion">
+        <p>
+            <strong>Måneskin</strong><br>
+            The Driver
+        </p>
+
+        <audio controls class="cancionAudio">
+            <source src="the-driver.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <button id="volverMusica" class="botonVolver">
+        ← Volver
+    </button>
+
+    <button id="continuarMusica">
+        Continuar →
+    </button>
+
+</div>
+</section>
+
+<!-- LO QUE TODAVÍA RECUERDO -->
+<section id="recuerdo" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Lo que todavía recuerdo</h2>
+
+    <p>
+        Todavía recuerdo esas veces en las que hablar contigo hacía
+        que todo lo demás dejara de importar por un rato.
+    </p>
+
+    <p>
+        Me gustaba escucharte, tu voz, tus ojos, tu forma de hablarte,
+        tu intensidad y esa personalidad que tenías.
+    </p>
+
+    <p>
+        Me gustaban muchas cosas de ti, pero sobre todo me gustaba
+        cómo me hacías sentir. Era como entrar en un mundo diferente,
+        uno en el que podía olvidarme un poco de todo lo que estaba
+        pasando afuera.
+    </p>
+
+    <p>
+        Y creo que por eso ahora hay momentos en los que siento
+        tanta melancolía. Porque ya no estás ahí para contarme cómo
+        estuvo tu día, para hablar hasta tarde, para jugar o simplemente
+        para estar ahí sin necesitar una razón.
+    </p>
+
+    <p>
+        Quizá desde afuera algunas de esas cosas parecían pequeñas,
+        pero para mí no lo eran.
+    </p>
+
+    <p>
+        Tú te convertiste en una parte importante de mis días
+        sin que me diera cuenta.
+    </p>
+
+    <p>
+        No quiero cambiar el pasado ni hacer que las cosas sean
+        diferentes a la fuerza. Solamente quería que supieras que
+        todo aquello significó algo para mí.
+    </p>
+
+    <button id="volverRecuerdo" class="botonVolver">
+        ← Volver
+    </button>
+
+    <button id="continuarRecuerdo">
+        Continuar →
+    </button>
+
+</div>
+</section>
+
+<!-- FOQUITA -->
+<section id="foquitaSeccion" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Una pequeña cosa más</h2>
+
+    <p>
+        Creo que todavía falta algo...
+    </p>
+
+    <div class="foquita-contenedor">
+
+        <div id="foquita" class="foquita">
+
+            <div class="aleta izq"></div>
+            <div class="aleta der"></div>
+
+            <div class="foquita-cuerpo">
+
+                <div class="manchita m1"></div>
+                <div class="manchita m2"></div>
+                <div class="manchita m3"></div>
+
+            </div>
+
+            <div class="foquita-cabeza">
+
+                <div class="ojo izq"></div>
+                <div class="ojo der"></div>
+                <div class="nariz"></div>
+                <div class="boca"></div>
+
+            </div>
+
+        </div>
+
+        <p id="mensajeFoquita"></p>
+
+        <button id="volverFoquita" class="botonVolver">
+            ← Volver
+        </button>
+
+        <button id="continuarFoquita">
+            Continuar →
+        </button>
+
+    </div>
+
+</div>
+</section>
+
+<!-- SEGUNDA CONTRASEÑA -->
+<section id="claveFinal" class="pantalla" style="display:none;">
+<div class="caja">
+
+    <h2>Una última cosa...</h2>
+
+    <p>
+        Si llegaste hasta aquí, todavía queda algo por abrir.
+    </p>
+
+    <input
+        id="passwordFinal"
+        type="password"
+        placeholder="Contraseña"
+    >
+
+    <br>
+
+    <button id="volverClaveFinal" class="botonVolver">
+        ← Volver
+    </button>
+
+    <button id="abrirFinal">
+        Abrir
+    </button>
+
+    <p id="errorFinal"></p>
+
+</div>
+</section>
+
+<!-- VIDEO FINAL -->
+<video id="videoFinal" playsinline>
+    <source src="video-final.mp4" type="video/mp4">
+</video>
+
+<div id="oscuroFinal"></div>
+
+<audio id="musicaFinal"></audio>
+
+<!-- CARTA FINAL -->
+<section id="final" class="pantalla">
+
+<div class="carta-final">
+
+    <h2>Para ti</h2>
+
+    <div class="carta-texto">
+
+        <p>
+            Todavía recuerdo esas veces en las que hablar contigo hacía
+            que todo lo demás dejara de importar por un rato.
+        </p>
+
+        <p>
+            Me gustaba escucharte, tu voz, tus ojos, tu forma de hablarme,
+            tu intensidad y esa personalidad que tenías. Me gustaban muchas
+            cosas de ti, pero sobre todo me gustaba cómo me hacía sentir.
+            Era como entrar en un mundo diferente, uno en el que podía
+            olvidarme un poco de todo lo que estaba pasando afuera.
+        </p>
+
+        <p>
+            Y creo que por eso ahora hay momentos en los que siento tanta
+            melancolía.
+        </p>
+
+        <p>
+            Porque ya no estás ahí para contarme cómo estuvo tu día,
+            para hablar hasta tarde, para jugar, para mandarnos cualquier
+            cosa que encontráramos o simplemente para estar ahí sin
+            necesitar una razón.
+        </p>
+
+        <p>
+            Quizá desde afuera algunas de esas cosas parecían pequeñas,
+            pero para mí no lo eran.
+        </p>
+
+        <p>
+            Tú te convertiste en una parte importante de mis días sin
+            que me diera cuenta.
+        </p>
+
+        <p>
+            También sé que tal vez hubo momentos en los que sentiste que
+            no te correspondía de la manera que necesitabas. Y entiendo
+            que hayas podido sentirlo así. No quiero cambiar tu forma
+            de ver las cosas.
+        </p>
+
+        <p>
+            Pero sí quiero que sepas que yo también estaba aprendiendo.
+            Aprendiendo a querer, a entender lo que sentía y a saber cómo
+            demostrarlo. Y aunque seguramente me equivoqué, tuve la
+            valentía de hablar contigo, de aprender de ti y de intentar
+            entender todo aquello que estaba sintiendo.
+        </p>
+
+        <p>
+            La verdad es que me hubiera gustado seguir aprendiendo contigo.
+        </p>
+
+        <p>
+            Me hubiera gustado conocerte mucho más, saber más de tu forma
+            de pensar, de tus gustos, de las cosas que te hacían feliz y
+            de todas esas pequeñas partes de ti que todavía no llegué
+            a conocer.
+        </p>
+
+        <p>
+            A veces pienso que quizá el tiempo nos limitó más de lo que
+            imaginábamos.
+        </p>
+
+        <p>
+            Hubo tantas cosas que pudimos haber vivido y que ya no puedo
+            recuperar. Y eso es algo que me duele, porque no existe una
+            manera de regresar a esos días y hacer las cosas diferente.
+        </p>
+
+        <p>
+            No puedo volver atrás para decirte cuánto te amaba y cuánto
+            te quería.
+        </p>
+
+        <p>
+            Tampoco puedo volver para conocerte en persona y darte ese
+            abrazo que tantas veces me hubiera gustado poder darte.
+        </p>
+
+        <p>
+            Eso es algo que me habría gustado tener contigo.
+        </p>
+
+        <p>
+            Pero aunque no haya pasado, no quiero borrar lo que sí tuvimos.
+        </p>
+
+        <p>
+            Quiero recordar las madrugadas, los juegos, nuestras
+            conversaciones, los videos, los animales bonitos que nos
+            mandábamos y todas esas pequeñas cosas que hicieron que poco
+            a poco te volvieras alguien tan importante para mí.
+        </p>
+
+        <p>
+            Y sí, extraño todo eso.
+        </p>
+
+        <p>
+            Extraño tenerte cerca, aunque fuera a través de una pantalla.
+            Extraño esa sensación de saber que estabas ahí.
+        </p>
+
+        <p>
+            Quizá nuestra historia pudo haber sido diferente. Quizá
+            pudimos haber tenido más tiempo. Quizá algunas cosas las
+            habríamos entendido mejor si hubiéramos tenido la oportunidad.
+        </p>
+
+        <p>
+            Pero ya no puedo cambiar eso.
+        </p>
+
+        <p>
+            Lo único que puedo hacer es guardar lo que vivimos y agradecer
+            que, durante un tiempo, nuestros caminos se hayan encontrado.
+        </p>
+
+        <p>
+            Porque tú fuiste importante para mí.
+        </p>
+
+        <p>
+            Y aunque ahora solo pueda recordar todo aquello, esos recuerdos
+            siguen teniendo un lugar especial dentro de mí.
+        </p>
+
+        <p>
+            Tal vez eso sea lo que quedó de nosotros:
+            las conversaciones que todavía recuerdo, las pequeñas cosas
+            que todavía me hacen pensar en ti y esa sensación de haber
+            conocido a alguien que, por un tiempo, hizo que mi mundo se
+            sintiera diferente.
+        </p>
+
+        <p>
+            Y eso, sinceramente, nunca voy a poder considerarlo poca cosa.
+        </p>
+
+        <p>
+            Tal vez algún día, cuando pase el tiempo, pueda mirar hacia atrás
+            y recordar todo esto con una sonrisa.
+        </p>
+
+        <p>
+            No porque haya dejado de importar, sino porque habré aprendido
+            a valorar que alguna vez nuestros caminos se encontraron.
+        </p>
+
+        <p>
+            Gracias por cada conversación, por cada madrugada, por cada juego,
+            por cada risa y por todas esas pequeñas cosas que compartimos.
+        </p>
+
+        <p>
+            Gracias por haber formado parte de una etapa de mi vida que,
+            aunque terminó siendo diferente a como imaginaba, siempre voy
+            a recordar.
+        </p>
+
+        <p>
+            No sé qué nos depare el futuro ni si nuestros caminos volverán
+            a cruzarse de la misma manera.
+        </p>
+
+        <p>
+            Pero si alguna vez recuerdas todo esto, espero que también puedas
+            recordar las cosas bonitas que vivimos y no solamente aquello
+            que salió mal.
+        </p>
+
+         <p>
+    Porque, a pesar de todo, me alegra haberte conocido.
+</p>
+
+<p>
+    Y aunque esta historia haya llegado hasta aquí, siempre voy a
+    guardar con cariño la parte de ella que me tocó vivir contigo.
+</p>
+
+<p>
+    Gracias por haber sido parte de mi historia.
+</p>
+
+<p style="text-align:center; margin-top:40px;">
+    <strong>I love you</strong>
+</p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- VIDEO FINAL -->
+<video id="videoFinal" playsinline>
+    <source src="video-final.mp4" type="video/mp4">
+</video>
+
+<div id="oscuroFinal"></div>
+
+<!-- CANCIÓN FINAL -->
+<audio id="musicaFinal"></audio>
+
+<script>
+
+const video = document.getElementById("video");
+const musica = document.getElementById("musica");
+
+function mostrar(id) {
+    document.querySelectorAll(".pantalla").forEach(seccion => {
+        seccion.style.display = "none";
+    });
+
+    document.getElementById(id).style.display = "flex";
+}
+
+document.getElementById("entrar").onclick = function() {
+    video.play().catch(() => {});
+    musica.play().catch(() => {});
+    mostrar("clave");
+};
+
+document.getElementById("abrir").onclick = function() {
+    const password = document.getElementById("password");
+    const error = document.getElementById("error");
+
+    if (password.value.trim().toLowerCase() !== "haylie") {
+        error.textContent = "Contraseña incorrecta.";
+        return;
+    }
+
+    error.textContent = "";
+    mostrar("primera");
+};
+
+document.getElementById("password").onkeydown = function(e) {
+    if (e.key === "Enter") {
+        document.getElementById("abrir").click();
+    }
+};
+
+video.addEventListener("ended", function() {
+    video.src = "video2.mp4";
+    video.load();
+    video.play().catch(() => {});
+
+    musica.src = "musica2.mp3";
+    musica.loop = true;
+    musica.load();
+    musica.play().catch(() => {});
+});
+
+document.getElementById("continuarPrimera").onclick = function() {
+    mostrar("segunda");
+};
+
+document.getElementById("volverSegunda").onclick = function() {
+    mostrar("primera");
+};
+
+document.getElementById("continuarSegunda").onclick = function() {
+    mostrar("musicaSeccion");
+};
+
+document.getElementById("volverMusica").onclick = function() {
+    mostrar("segunda");
+};
+
+document.getElementById("continuarMusica").onclick = function() {
+    mostrar("recuerdo");
+};
+
+document.getElementById("volverRecuerdo").onclick = function() {
+    mostrar("musicaSeccion");
+};
+
+document.getElementById("continuarRecuerdo").onclick = function() {
+    mostrar("foquitaSeccion");
+};
+
+const foquita = document.getElementById("foquita");
+const mensajeFoquita = document.getElementById("mensajeFoquita");
+const continuarFoquita = document.getElementById("continuarFoquita");
+
+let clicksFoquita = 0;
+
+foquita.onclick = function() {
+    clicksFoquita++;
+
+    mensajeFoquita.style.opacity = "1";
+
+    if (clicksFoquita === 1) {
+        mensajeFoquita.textContent =
+            "A veces las cosas pequeñas también significan mucho.";
+    } else if (clicksFoquita === 2) {
+        mensajeFoquita.textContent =
+            "Y esta foquita también tenía que aparecer.";
+    } else {
+        mensajeFoquita.textContent =
+            "Creo que ahora sí estás listo para continuar.";
+
+        continuarFoquita.style.display = "inline-block";
+    }
+};
+
+document.getElementById("volverFoquita").onclick = function() {
+    mostrar("recuerdo");
+};
+
+continuarFoquita.onclick = function() {
+    mostrar("claveFinal");
+};
+
+document.getElementById("volverClaveFinal").onclick = function() {
+    mostrar("foquitaSeccion");
+};
+
+document.getElementById("abrirFinal").onclick = function() {
+
+    const passwordFinal =
+        document.getElementById("passwordFinal");
+
+    const errorFinal =
+        document.getElementById("errorFinal");
+
+    if (passwordFinal.value.trim().toLowerCase() !== "corazon") {
+        errorFinal.textContent = "Contraseña incorrecta.";
+        return;
+    }
+
+    errorFinal.textContent = "";
+
+    video.pause();
+    musica.pause();
+
+    const videoFinal =
+        document.getElementById("videoFinal");
+
+    const oscuroFinal =
+        document.getElementById("oscuroFinal");
+
+    const musicaFinal =
+        document.getElementById("musicaFinal");
+
+    videoFinal.style.display = "block";
+    oscuroFinal.style.display = "block";
+
+    videoFinal.src = "video-final.mp4";
+    videoFinal.load();
+    videoFinal.currentTime = 0;
+
+    videoFinal.play()
+        .then(() => console.log("VIDEO FINAL REPRODUCIENDO"))
+        .catch((e) => console.log("VIDEO FINAL ERROR:", e));
+
+    musicaFinal.src = "cancion-final.mp3";
+    musicaFinal.loop = true;
+    musicaFinal.load();
+
+    musicaFinal.play()
+        .then(() => console.log("MUSICA FINAL REPRODUCIENDO"))
+        .catch((e) => console.log("MUSICA FINAL ERROR:", e));
+
+    document.getElementById("claveFinal").style.display = "none";
+
+    const final = document.getElementById("final");
+
+    final.style.setProperty("display", "flex", "important");
+};
+
+document.getElementById("passwordFinal").onkeydown = function(e) {
+    if (e.key === "Enter") {
+        document.getElementById("abrirFinal").click();
+    }
+};
+
+const canciones =
+    document.querySelectorAll(".cancionAudio");
+
+canciones.forEach(cancion => {
+
+    cancion.addEventListener("play", function() {
+        musica.pause();
+    });
+
+    cancion.addEventListener("pause", function() {
+        musica.play().catch(() => {});
+    });
+
+    cancion.addEventListener("ended", function() {
+        musica.play().catch(() => {});
+    });
+
+});
+
+</script>
+
+</body>
+</html>
